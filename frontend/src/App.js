@@ -11,7 +11,7 @@ function App() {
   // Tasks fetch karne ka function
   const getTasks = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/tasks/all');
+      const res = await fetch('https://team-task-manager-nmwu.onrender.com');
       const data = await res.json();
       setTasks(data);
     } catch (err) { console.log("Error fetching tasks:", err); }
@@ -24,7 +24,7 @@ function App() {
   // Naya task add karne ka function
   const handleAddTask = async (e) => {
     e.preventDefault();
-    await fetch('http://localhost:5000/api/tasks/add', {
+    await fetch('https://team-task-manager-nmwu.onrender.com', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: taskTitle, status: 'Todo' })
@@ -35,7 +35,7 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    const res = await fetch('https://team-task-manager-nmwu.onrender.com', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
