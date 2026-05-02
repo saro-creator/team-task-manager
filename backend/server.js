@@ -11,7 +11,7 @@ console.log("Cheking DB URL:", process.env.MONGO_URI); // Ye line batayegi ki UR
 
 const app = express();
 app.use(cors(
-  {origin:'https://team-task-manager-1-2i9z.onrender.com'}
+  {origin:"https://team-task-manager-1-2i9z.onrender.com"}
 ));
 app.use(express.json());
 
