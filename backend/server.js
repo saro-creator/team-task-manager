@@ -9,6 +9,12 @@ require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 
 console.log("Cheking DB URL:", process.env.MONGO_URI); // Ye line batayegi ki URL mila ya nahi
 
+
+// server.js mein
+const authRoutes = require('./routes/auth'); // Check kijiye path sahi hai
+app.use('/api/auth', authRoutes);
+
+ //
 const app = express();
 app.use(cors(
   {origin:"https://team-task-manager-1-2i9z.onrender.com"}

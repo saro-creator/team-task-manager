@@ -4,20 +4,31 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// 1. Signup Route
-router.post('/signup', async (req, res) => {
+// 1. Register Route (Pehle yahan /signup tha, ise ab /register kar diya hai)
+router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    
-    // Password ko lock lagana (Hashing)
+
+    // Check karein ki user pehle se toh nahi hai
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User pehle se maujood hai!" });
+    }
+
+    // Password ko secure banana (Hashing)
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const newUser = new User({ name, email, password: hashedPassword, role });
+
+    const newUser = new User({ 
+      name, 
+      email, 
+      password: hashedPassword, 
+      role: role || 'user' // Default role 'user' rakha hai
+    });
+
     await newUser.save();
-    
     res.status(201).json({ message: "User ban gaya! Ab login karo." });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: "Server Error: " + err.message });
   }
 });
 
@@ -25,18 +36,32 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // User ko dhoondna
     const user = await User.findOne({ email });
-    
-    if (!user) return res.status(404).json({ message: "User nahi mila!" });
+    if (!user) {
+      return res.status(404).json({ message: "User nahi mila!" });
+    }
 
+    // Password match karna
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Galat password!" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Galat password!" });
+    }
 
-    // Ek secret token dena (Identity Card)
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
-    res.json({ token, user: { name: user.name, role: user.role } });
+    // JWT Token generate karna (Environment variable JWT_SECRET zaroori hai)
+    const token = jwt.sign(
+      { id: user._id, role: user.role }, 
+      process.env.JWT_SECRET || 'fallback_secret', // Fallback agar env na mile
+      { expiresIn: '1d' }
+    );
+
+    res.json({ 
+      token, 
+      user: { name: user.name, email: user.email, role: user.role } 
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: "Server Error: " + err.message });
   }
 });
 
