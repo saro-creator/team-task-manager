@@ -8,9 +8,13 @@ require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 
 console.log("Cheking DB URL:", process.env.MONGO_URI);
 app.use(cors({
-    origin: "https://team-task-manager-1-2i9z.onrender.com", // Aapka frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+  origin: [
+    'https://team-task-manager-1-2i9z.onrender.com', // Aapka live domain
+    'http://localhost:3000',                        // Aapka local development
+    'http://localhost:5173'                         // Agar aap Vite use kar rahe hain
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
 }));
 
 app.use(express.json());
