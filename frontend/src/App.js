@@ -1,32 +1,43 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Register from './pages/Register'; // Check karein ye path sahi hai
-import Login from './pages/Login'; // Naya import
+import Register from './pages/Register'; 
+import Login from './pages/Login'; 
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  // Yeh check karta hai ki user ne pehle se login kiya hai ya nahi
+  const isLoggedIn = !!localStorage.getItem('token');
 
   return (
     <Router>
       <Routes>
-        {/* Main page par login dikhayega */}
-        <Route path="/" element={!isLoggedIn ? <div style={{textAlign: 'center', marginTop: '100px'}}><h2>Login Page</h2></div> : <Navigate to="/dashboard" />} />
+        {/* Jab koi sirf website ka link khole, toh use Login par bhej do */}
+        <Route path="/" element={<Navigate to="/login" />} />
         
-        {/* Ye line sabse zaroori hai */}
+        {/* Registration Page ka Route */}
         <Route path="/register" element={<Register />} />
-      </Routes>
-    </Router>
-  );
-}
-//loginss
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/register" element={<Register />} />
+        
+        {/* Login Page ka Route */}
         <Route path="/login" element={<Login />} />
+        
+        {/* Dashboard ka Route: Agar token hai toh dikhao, nahi toh Login par bhej do */}
+        <Route 
+          path="/dashboard" 
+          element={isLoggedIn ? (
+            <div style={{ textAlign: 'center', marginTop: '50px' }}>
+              <h1>Dashboard Page</h1>
+              <p>Welcome! Aap login ho chuke hain.</p>
+              <button onClick={() => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+              }}>Logout</button>
+            </div>
+          ) : (
+            <Navigate to="/login" />
+          )} 
+        />
+        
+        {/* Agar koi galat URL daale toh Login par bhej do */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
