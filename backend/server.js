@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const app = express();
+
 
 //console.log("Mera DB URL hai: ", process.env.MONGO_URI);
 const path = require('path');
@@ -15,7 +17,7 @@ const authRoutes = require('./routes/auth'); // Check kijiye path sahi hai
 app.use('/api/auth', authRoutes);
 
  //
-const app = express();
+//const app = express();
 app.use(cors(
   {origin:"https://team-task-manager-1-2i9z.onrender.com"}
 ));
