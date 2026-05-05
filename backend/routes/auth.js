@@ -18,12 +18,13 @@ router.post('/register', async (req, res) => {
     // Password ko secure banana (Hashing)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ 
-      name, 
-      email, 
-      password: hashedPassword, 
-      role: role || 'User' // Default role 'user' rakha hai
-    });
+    // backend/routes/auth.js mein
+const newUser = new User({ 
+  name, 
+  email, 
+  password: hashedPassword, 
+  role: role ? role.toLowerCase() : 'user' // Isse hamesha lowercase 'user' jayega
+});
 
     await newUser.save();
     res.status(201).json({ message: "User ban gaya! Ab login karo." });
