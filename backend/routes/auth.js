@@ -4,10 +4,14 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// 1. Register Route (Pehle yahan /signup tha, ise ab /register kar diya hai)
+// 1. Register Route
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
     // Check karein ki user pehle se toh nahi hai
     const existingUser = await User.findOne({ email });
@@ -18,13 +22,12 @@ router.post('/register', async (req, res) => {
     // Password ko secure banana (Hashing)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // backend/routes/auth.js mein
-const newUser = new User({ 
-  name, 
-  email, 
-  password: hashedPassword, 
-  role: role ? role.toLowerCase() : 'user' // Isse hamesha lowercase 'user' jayega
-});
+    const newUser = new User({ 
+      name, 
+      email, 
+      password: hashedPassword, 
+      role: role ? role.toLowerCase() : 'user'
+    });
 
     await newUser.save();
     res.status(201).json({ message: "User ban gaya! Ab login karo." });
@@ -38,6 +41,10 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
     // User ko dhoondna
     const user = await User.findOne({ email });
     if (!user) {
@@ -50,10 +57,10 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: "Galat password!" });
     }
 
-    // JWT Token generate karna (Environment variable JWT_SECRET zaroori hai)
+    // JWT Token generate karna
     const token = jwt.sign(
       { id: user._id, role: user.role }, 
-      process.env.JWT_SECRET || 'fallback_secret', // Fallback agar env na mile
+      process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '1d' }
     );
 

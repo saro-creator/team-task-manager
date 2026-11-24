@@ -1,4 +1,11 @@
 {
+  "name": "team-task-manager",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "npm --prefix backend test",
+    "test:frontend": "npm --prefix frontend test -- --watchAll=false"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
