@@ -1,38 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 // 1. Register Route
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: 'Saari fields bharna zaroori hai!' });
     }
 
-    // Check karein ki user pehle se toh nahi hai
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ message: "User pehle se maujood hai!" });
+      return res.status(400).json({ message: 'Yeh email pehle se registered hai!' });
     }
 
-    // Password ko secure banana (Hashing)
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = new User({ 
-      name, 
-      email, 
-      password: hashedPassword, 
-      role: role ? role.toLowerCase() : 'user'
+    const newUser = new User({
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
     });
 
     await newUser.save();
-    res.status(201).json({ message: "User ban gaya! Ab login karo." });
+    res.status(201).json({ message: 'User successfully registered!' });
   } catch (err) {
-    res.status(500).json({ message: "Server Error: " + err.message });
+    console.error('Register Error:', err);
+    res.status(500).json({ message: 'Server Error: ' + err.message });
   }
 });
 
@@ -41,35 +40,29 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
-    }
-
-    // User ko dhoondna
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(404).json({ message: "User nahi mila!" });
+      return res.status(400).json({ message: 'User nahi mila! Pehle Register karein.' });
     }
 
-    // Password match karna
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Galat password!" });
+      return res.status(400).json({ message: 'Password galat hai!' });
     }
 
-    // JWT Token generate karna
     const token = jwt.sign(
-      { id: user._id, role: user.role }, 
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '1d' }
     );
 
-    res.json({ 
-      token, 
-      user: { name: user.name, email: user.email, role: user.role } 
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server Error: " + err.message });
+    console.error('Login Error:', err);
+    res.status(500).json({ message: 'Server Error: ' + err.message });
   }
 });
 
